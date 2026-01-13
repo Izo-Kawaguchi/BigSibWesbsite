@@ -1,1 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Big Sibs Tools</title>
+    <style>
+        /*basically makes it so that formatting is easier by making it fill the whole page */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: Arial, sans-serif;
+            background: black;
+            color: #ffd700;
+            height: 100vh;
+            display: flex;
+        }
+
+        /* Makes eveyrhting that is typed in same style */
+        input, textarea {
+            padding: 11px;
+            font-size: 16px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            width: 90%;
+            resize: vertical;
+        }
+
+        .sidebar {
+            width: 200px;
+            background: #111;
+            border-right: 1px solid #ffd700;
+        }
+
+        .logo {
+            padding: 20px;
+            border-bottom: 1px solid #ffd700;
+            text-align: center;
+        }
+
+        .tool-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            color: #ccc;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tool-item:hover {
+            color: #ffd700;
+        }
+
+        .tool-item.active {
+            color: #ffd700;
+            border-left-color: #ffd700;
+        }
+
+        .content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        /* Basically makes it so that the tool is hidden by deafult */
+        .tool-detail {
+            display: none;
+        }
+
+        /* Only displays selected tools */
+        .tool-detail.active {
+            display: block;
+        }
+
+        .code-box {
+            background: #0b0b0b;
+            border: 1px solid #ffd700;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            color: #ffed4e;
+            font-family: "Courier New", monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+
+        /* Strange but this was needed in order to make sure that it ISN't part of the list before */
+        .code-box::before {
+            content: none;
+        }
+
+        /* Button styling */
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background: #ffd700;
+            color: black;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #ffed4e;
+        }
+
+        /* Headings */
+        h1 {
+            font-size: 1.5em;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-size: 1.3em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        /* Paragraph text */
+        p {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* List styling */
+        ul {
+            list-style: none;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        li {
+            padding: 8px 0;
+        }
+
+        li::before {
+            content: "• ";
+            color: #ffd700;
+        }
+
+        #sentenceList li {
+            background: #0b0b0b;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        #sentenceList li::before {
+            content: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h1>BIG SIBS</h1>
+        </div>
+        <div class="tool-item active" onclick="showTool('email', this)">Email Scripts</div>
+        <div class="tool-item" onclick="showTool('interview', this)">Interview Tips</div>
+    </div>
+
+    <div class="content">
+        <div class="tool-detail active" id="email">
+            <h2>Email Scripts</h2>
+            <p>Here are the steps to use my code:</p>
+            <ul>
+                <li>Replace the spreadsheet URL link with the notes included.</li>
+                <li>Pay attention to the start and end row.</li>
+            </ul>
+            <pre class="code-box"><code>
+                function sendStrikeEmails() {
+  // Replace 'YOUR_SHEET_ID' with your actual Google Sheets ID
+  // You can find this in your sheet's URL: https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit
+  const SHEET_ID = '1n0-aX3C0JSjXHOw446pYXRUSrkh29SXDCknMtqYQWl4'; // Replace this!
+  const spreadsheet = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = spreadsheet.getActiveSheet();
+  
+  // Get all data from the sheet
+  const data = sheet.getDataRange().getValues();
+  
+  // Assuming row 1 contains headers, start from row 2
+  const headers = data[0]; // Get header row
+  
+  // Find column indices (assuming C=names, D=emails, F=total strikes, G-P=strike details)
+  const nameCol = 2; // Column C (0-indexed)
+  const emailCol = 3; // Column D (0-indexed)
+  const totalStrikesCol = 5; // Column F (0-indexed)
+  const strikeDetailsStartCol = 6; // Column G (0-indexed)
+  const strikeDetailsEndCol = 17; // Column P (0-indexed)
+  
+  // Get headers for strike details columns (G-P) - ALWAYS from row 1
+  const strikeHeaders = headers.slice(strikeDetailsStartCol, strikeDetailsEndCol + 1);
+  
+  // Loop through rows starting from row 3 (index 2) to row 151
+  const startRow = 114; // Row 3 in spreadsheet (0-indexed, so row 3 = index 2)
+  const endRow = Math.min(151, data.length - 1); // Row 151 in spreadsheet, or end of data
+  
+  console.log(`Sending emails to rows ${startRow + 1} through ${endRow + 1} (${endRow - startRow + 1} emails total)`);
+  
+  for (let i = startRow; i <= endRow; i++) {
+    const row = data[i];
+    const fullName = row[nameCol];
+    const email = row[emailCol];
+    const totalStrikes = row[totalStrikesCol];
+    
+    // Skip if email is empty
+    if (!email || email.toString().trim() === '') {
+      continue;
+    }
+    
+    // Extract first name from full name
+    const firstName = fullName ? fullName.toString().split(' ')[0] : 'there';
+    
+    // Get strike details for columns G-P
+    const strikeDetails = row.slice(strikeDetailsStartCol, strikeDetailsEndCol + 1);
+    
+    // Create the strike details table as plain text, replacing null/empty with 0
+    let strikeTable = '';
+    for (let j = 0; j < strikeHeaders.length; j++) {
+      const strikeValue = (strikeDetails[j] === null || strikeDetails[j] === '' || strikeDetails[j] === undefined) ? 0 : strikeDetails[j];
+      strikeTable += `${strikeHeaders[j]}: ${strikeValue}\n`;
+    }
+    
+    // Create email body with strike table included
+    const subject = 'Big Sib Strikes';
+    const body = `Hello ${firstName},
+
+As we are approaching the halfway mark of the school year, we wanted to send a reminder of a strike policy to everyone.
+
+Strike chart for all mandatory events:
+         Attended Part of Event       Completely Absent
+Excused        0.25                         0.5
+Unexcused       1                           1.5
+
+Total Strikes: ${totalStrikes}
+
+Your Strike Breakdown:
+${strikeTable}
+Missing part - You come for at least half the time of the event
+Excused- Filled out the absence form with a valid excuse
+Unexcused- If you did not fill out the absence excuse form OR you filled out the absence form and we have reached out before the event telling you that it is an invalid excuse.
+
+For Seniors: Big Sibs graduation stoles can be purchased if you have under 2 strikes. The stoles will be ~$18, depending on how many we order.
+
+For Juniors: Strikes would be in consideration for admission to the next cohort of a Big Sibs, whether this means as a Big Sib, Homeroom leader or Chair. 
+
+Strike accumulation for this cohort will end on May 1, 2026.
+As always, there will be more opportunities in the near future for negative strikes. (ie. StuyPrep Tours, Food/Volunteering at Jolly January, Optional events)
+
+If there are any errors please reply to this email with the correction!
+
+Best regards,
+Big Sib Chairs 26'`;
+
+    try {
+      // Send email
+      GmailApp.sendEmail(email, subject, body);
+      console.log(`Email sent successfully to: ${email}`);
+      
+      // Add a small delay to avoid rate limiting (optional)
+      Utilities.sleep(100); // 100ms delay
+      
+    } catch (error) {
+      console.error(`Failed to send email to ${email}:`, error);
+    }
+  }
+  
+  console.log(`Email sending process completed for rows 3-151! Sent ${endRow - startRow + 1} emails.`);
+}
+
+function testSingleEmail() {
+  // Replace 'YOUR_SHEET_ID' with your actual Google Sheets ID
+  const SHEET_ID = '1n0-aX3C0JSjXHOw446pYXRUSrkh29SXDCknMtqYQWl4'; // Replace this!
+  const spreadsheet = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = spreadsheet.getActiveSheet();
+  const data = sheet.getDataRange().getValues();
+  
+  // Test with row 3 (index 2)
+  if (data.length < 3) {
+    console.log('No data found in row 3');
+    return;
+  }
+  
+  const headers = data[0];
+  const testRow = data[2]; // Row 3 (index 2)
+  
+  const fullName = testRow[2]; // Column C
+  const email = testRow[3]; // Column D
+  const totalStrikes = testRow[5]; // Column F
+  const strikeDetails = testRow.slice(6, 18); // Columns G-P (inclusive, so slice needs 18 to include index 17)
+  const strikeHeaders = headers.slice(6, 18); // Columns G-P (inclusive)
+  
+  // Extract first name
+  const firstName = fullName ? fullName.toString().split(' ')[0] : 'there';
+  
+  let strikeTable = '';
+  for (let j = 0; j < strikeHeaders.length; j++) {
+    const strikeValue = (strikeDetails[j] === null || strikeDetails[j] === '' || strikeDetails[j] === undefined) ? 0 : strikeDetails[j];
+    strikeTable += `${strikeHeaders[j]}: ${strikeValue}\n`;
+  }
+  
+  const subject = 'Big Sib Strikes';
+  const body = `Hello ${firstName},
+
+As we are approaching the halfway mark of the school year, we wanted to send a reminder of a strike policy to everyone.
+
+Strike chart for all mandatory events:
+         Attended Part of Event       Completely Absent
+Excused        0.25                         0.5
+Unexcused       1                           1.5
+
+Total Strikes: ${totalStrikes}
+
+Your Strike Breakdown:
+${strikeTable}
+Missing part - You come for at least half the time of the event
+Excused- Filled out the absence form with a valid excuse
+Unexcused- If you did not fill out the absence excuse form OR you filled out the absence form and we have reached out before the event telling you that it is an invalid excuse.
+
+For Seniors: Big Sibs graduation stoles can be purchased if you have under 2 strikes. The stoles will be ~$18, depending on how many we order.
+
+For Juniors: Strikes would be in consideration for admission to the next cohort of a Big Sibs, whether this means as a Big Sib, Homeroom leader or Chair. 
+
+Strike accumulation for this cohort will end on May 1, 2026.
+As always, there will be more opportunities in the near future for negative strikes. (ie. StuyPrep Tours, Food/Volunteering at Jolly January, Optional events)
+
+If there are any errors please reply to this email with the correction!
+
+Best regards,
+Big Sib Chairs 26'`;
+
+  console.log('Test email body:');
+  console.log(body);
+  console.log('\n---\n');
+
+  try {
+    GmailApp.sendEmail(email, subject, body);
+    console.log(`Test email sent successfully to: ${email}`);
+  } catch (error) {
+    console.error(`Failed to send test email:`, error);
+  }
+}
+            </code></pre>
+        </div>
+
+        <div class="tool-detail" id="interview">
+            <h2>Interview Tips</h2>
+            <p>Paste interview notes below. Each sentence will be separated and analyzed for sentiment.</p>
+            
+            <textarea id="query" rows="6" placeholder="Paste interview notes here..."></textarea>
+            <button onclick="handleSubmit()">Analyze</button>
+            
+            <h3>Detected Sentences</h3>
+            <ul id="sentenceList"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Switches between tools 
+        function showTool(toolId, element) {
+            // Hide all tools
+            document.querySelectorAll('.tool-detail').forEach(tool => {
+                tool.classList.remove('active');
+            });
+            
+            // Show selected tool
+            document.getElementById(toolId).classList.add('active');
+
+            // Remove active state from all other tools.
+            document.querySelectorAll('.tool-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            // Changes the class to active
+            element.classList.add('active');
+        }
+
+        // Splits interview notes into sentences and displays them
+        async function handleSubmit() {
+            const text = document.getElementById('query').value.trim();
+            const list = document.getElementById('sentenceList');
+            list.innerHTML = '';
+
+            if (!text) {
+                alert('Please enter interview notes');
+                return;
+            }
+
+            try {
+                const response = await fetch("http://localhost:5000/analyze", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ text })
+                });
+
+                const data = await response.json();
+
+                data.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <strong>${item.sentence}</strong><br>
+                        Sentiment: <b>${item.label}</b><br>
+                        Pos: ${(item.scores.pos * 100).toFixed(1)}% |
+                        Neu: ${(item.scores.neu * 100).toFixed(1)}% |
+                        Neg: ${(item.scores.neg * 100).toFixed(1)}%
+                    `;
+                    list.appendChild(li);
+                });
+            } catch (error) {
+                alert('Error analyzing text: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
