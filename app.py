@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from flask_cors import CORS
 import re
@@ -23,6 +23,9 @@ def analyze_sentence(sentence):
         "scores": scores,
         "label": label
     }
+@app.route("/")
+def home():
+    return render_template("main.html")
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
