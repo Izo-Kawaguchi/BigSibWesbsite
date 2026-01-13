@@ -25,7 +25,7 @@ def analyze_sentence(sentence):
     }
 @app.route("/")
 def home():
-    return render_template("main.html")
+    return render_template("Main.html")
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
